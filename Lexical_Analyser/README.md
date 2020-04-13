@@ -8,3 +8,4 @@ To run the lexical analyser
  
  input.t is the input while where the input for lexical analyser is given and output.lex contains the outout of the lexical analyser.
 
+https://rosettacode.org/wiki/Compiler/lexical_analyzer
