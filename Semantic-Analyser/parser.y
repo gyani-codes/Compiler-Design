@@ -35,17 +35,17 @@ symbol_node_t * check_redefined_error(char *symbol);
 
 // To allow for mutiple datatypes
 %union {
-	char char_ptr[100];
+	char char_pointer[100];
 }
 
-%token <char_ptr> IDENTIFIER
-%token <char_ptr> INT
-%token <char_ptr> CHAR
-%token <char_ptr> FLOAT
-%token <char_ptr> DOUBLE
-%token <char_ptr> VOID
+%token <char_pointer> IDENTIFIER
+%token <char_pointer> INT
+%token <char_pointer> CHAR
+%token <char_pointer> FLOAT
+%token <char_pointer> DOUBLE
+%token <char_pointer> VOID
 
-%type <char_ptr> Type
+%type <char_pointer> Type
 
 %right '=' ADD_ASSIGN SUB_ASSIGN MUL_ASSIGN DIV_ASSIGN MOD_ASSIGN LEFT_ASSIGN RIGHT_ASSIGN AND_ASSIGN XOR_ASSIGN OR_ASSIGN         
 %left LOGIC_AND LOGIC_OR NOT INCREMENT_OPERATOR DECREMENT_OPERATOR
@@ -58,10 +58,10 @@ symbol_node_t * check_redefined_error(char *symbol);
 %token SWITCH BREAK CONTINUE CASE DEFAULT RETURN
 %token FOR WHILE DO
 %token IF ELSE  
-%token <char_ptr> CONSTANT_INTEGER
-%token <char_ptr> CONSTANT_FLOAT
-%token <char_ptr> CONSTANT_STRING
-%token <char_ptr> CONSTANT_CHAR
+%token <char_pointer> CONSTANT_INTEGER
+%token <char_pointer> CONSTANT_FLOAT
+%token <char_pointer> CONSTANT_STRING
+%token <char_pointer> CONSTANT_CHAR
 
 
 %start Begin //	start symbol
