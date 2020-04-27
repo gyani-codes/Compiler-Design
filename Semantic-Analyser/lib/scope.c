@@ -18,14 +18,14 @@ scope_node_t *create_scope()
     return node;
 }
 
-// Create Global Scope
+
+// for creating the global scope
 scope_node_t *init_scope()
 {
     return create_scope();
 }
 
-// Checks whether a given scope num is present in current or any of its
-// ancestor scope
+//checking if a scope number is present in the current scope or any of the previous scopes.
 bool check_within_scope(scope_node_t *curr_scope, int scope_key)
 {
     scope_node_t *node = curr_scope;
@@ -43,21 +43,6 @@ bool check_within_scope(scope_node_t *curr_scope, int scope_key)
     return false;
 }
 
-scope_node_t *add_child_scope(scope_node_t *curr_scope)
-{
-    scope_node_t *node = create_scope();
-    node->parent_scope = curr_scope;
-
-    return node;
-}
-
-scope_node_t *goto_parent_scope(scope_node_t *curr_scope)
-{
-    scope_node_t *parent = curr_scope->parent_scope;
-    free(curr_scope);
-
-    return parent;
-}
 
 scope_node_t *scope_check(symbol_node_t **symbol_table, char *symbol, scope_node_t *curr_scope)
 {
@@ -77,6 +62,20 @@ scope_node_t *scope_check(symbol_node_t **symbol_table, char *symbol, scope_node
     return NULL;
 }
 
+
+
+// creating the scpoe of the child
+scope_node_t *add_child_scope(scope_node_t *curr_scope)
+{
+    scope_node_t *node = create_scope();
+    node->parent_scope = curr_scope;
+
+    return node;
+}
+
+
+
+//checking if a scope number is present in the current scope
 bool check_in_current_scope(symbol_node_t **symbol_table, char *symbol, scope_node_t *curr_scope){
     int hash_index = symbol_table_hash(symbol);
 
@@ -94,3 +93,13 @@ bool check_in_current_scope(symbol_node_t **symbol_table, char *symbol, scope_no
 
     return false;
 }
+
+// finding the scope of the parent and deallocating the current scope
+scope_node_t *goto_parent_scope(scope_node_t *curr_scope)
+{
+    scope_node_t *parent = curr_scope->parent_scope;
+    free(curr_scope);
+
+    return parent;
+}
+

@@ -41,27 +41,27 @@ single_operators    [+*/%^&.=-]
                                     }
 int                                 { 
                                         trace("INT");
-                                        strcpy(yylval.char_pointer, yytext);
+										strcpy(yylval.char_pointer, yytext);
                                         return INT;
                                     }
 char                                { 
                                         trace("CHAR");
-                                        strcpy(yylval.char_pointer, yytext);
+										strcpy(yylval.char_pointer, yytext);
                                         return CHAR;
                                     }
 float                               { 
                                         trace("FLOAT");
-                                        strcpy(yylval.char_pointer, yytext);
+										strcpy(yylval.char_pointer, yytext);
                                         return FLOAT;
                                     }
 double                              { 
                                         trace("DOUBLE");
-                                        strcpy(yylval.char_pointer, yytext);
+										strcpy(yylval.char_pointer, yytext);
                                         return DOUBLE;
                                     }
 void                                { 
                                         trace("VOID");
-                                        strcpy(yylval.char_pointer, yytext);
+										strcpy(yylval.char_pointer, yytext);
                                         return VOID;
                                     }
 signed                              { 
@@ -231,21 +231,21 @@ return                              {
                                         trace("/="); 
                                         return DIV_ASSIGN;
                                     }
-"%="                                { 
+"%="					            { 
                                         trace("%="); 
                                         return MOD_ASSIGN;
                                     }
 
-">>="                               { 
+">>="					            { 
                                         trace(">>="); 
                                         return RIGHT_ASSIGN;
                                     }
-"<<="                               { 
+"<<="					            { 
                                         trace("<<="); 
                                         return LEFT_ASSIGN;
                                     }
 
-"&="                                { 
+"&="					            { 
                                         trace("&="); 
                                         return AND_ASSIGN;
                                     }
@@ -265,11 +265,11 @@ return                              {
                                         trace("--"); 
                                         return DECREMENT_OPERATOR;
                                     }
-"^="                                { 
+"^="					            { 
                                         trace("^="); 
                                         return XOR_ASSIGN;
                                     }
-"|="                                { 
+"|="					            { 
                                         trace("|="); 
                                         return OR_ASSIGN;
                                     }
@@ -295,9 +295,9 @@ void multiline_comment()
 
         if (abc == '*'){
           
-      while ((abc = input()) == '*');
+	  while ((abc = input()) == '*');
            
-       if (abc=='/')
+	   if (abc=='/')
                return;
 
             if (abc== 0)
