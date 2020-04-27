@@ -5,7 +5,7 @@
 #include "symbol_table.h"
 #include "misc.h"
 
-void symbol_table_initialize(symbol_node_t **symbol_table){
+void sym_tab_init(symbol_node_t **symbol_table){
 
    for(int i=0; i< MAX_SYMBOL_TABLE_SIZE; ++i){
       symbol_table[i] = NULL;
@@ -38,8 +38,8 @@ symbol_node_t *create_symbol_node(const char* symbol, const char *type, const in
    return node;
 }
 
-symbol_node_t * symbol_table_insert(symbol_node_t **symbol_table, const char* symbol, const int scope_num, const char *type, const char *arr_size, const int line_number){
-   // if(symbol_table_lookup(symbol_table, symbol))
+symbol_node_t * sym_tab_insert(symbol_node_t **symbol_table, const char* symbol, const int scope_num, const char *type, const char *arr_size, const int line_number){
+   // if(sym_tab_arrayLook(symbol_table, symbol))
    //    return;
 
    int hash_index = symbol_table_hash(symbol);
@@ -58,7 +58,7 @@ symbol_node_t * symbol_table_insert(symbol_node_t **symbol_table, const char* sy
    }
 }
 
-symbol_node_t * symbol_table_lookup(symbol_node_t **symbol_table, const char* symbol){
+symbol_node_t * sym_tab_arrayLook(symbol_node_t **symbol_table, const char* symbol){
 
    int hash_index = symbol_table_hash(symbol);
    for(symbol_node_t *curr = symbol_table[hash_index]; curr != NULL; curr = curr->next){
@@ -72,26 +72,9 @@ symbol_node_t * symbol_table_lookup(symbol_node_t **symbol_table, const char* sy
    return NULL;
 }
 
-void symbol_table_free(symbol_node_t **symbol_table){
+void sym_tab_free(symbol_node_t **symbol_table){
 
    for(int i=0; i< MAX_SYMBOL_TABLE_SIZE; ++i){
       free(symbol_table[i]);
    }
-}
-
-void symbol_table_print(symbol_node_t **symbol_table, const char *table_name){
-   printf("\n\n" FORE_MAG DASHES RESET);
-   printf(FORE_CYN "%s\t\n" RESET, table_name);
-   printf(FORE_YEL DASHES RESET);
-
-   printf(FORE_GRN "|\t%-20.20s" "|\t%-20.20s" "|\t%-20.20s|" "|\t%-20.20s|" "|\t%-20.20s|" "\n" RESET, "Symbol", "Scope_Num", "Type", "Array Dim", "Line Number");
-   printf(FORE_YEL DASHES RESET);
-
-   for(int i=0; i< MAX_SYMBOL_TABLE_SIZE; ++i){
-      for(symbol_node_t *curr = symbol_table[i]; curr != NULL; curr = curr->next){
-         printf(FORE_GRN "|\t%-20.20s" "|\t%-20d" "|\t%-20.20s" "|\t%-20.20s" ATTR_BOLD "|\t%-20d|" "\n" RESET, curr->symbol, curr->scope_num, curr->type, curr->arr_size, curr->line_number);
-      }
-   }
-
-   printf(FORE_MAG DASHES RESET "\n\n");
 }

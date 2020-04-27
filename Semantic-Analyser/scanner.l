@@ -1,37 +1,28 @@
-/*
-* Scanner for C language
-*
-* Ref: http://www.quut.com/c/ANSI-C-grammar-l-2011.html
-*
-* @author Shashank P, Praveen Gupta, Ashwin Joisa
-*/
-
 %{
 #include "y.tab.h"
-#include "lib/misc.h"
 
+#include "lib/misc.h"
 %}
 
 number          [0-9]
 letter          [a-zA-Z]
 single_operators    [+*/%^&.=-]
 
-%option yylineno
-%option noyywrap
+/* for excessing number ,letters and  and single operators */
 
+/* "trace" is used to control whether all input characters are ECHOed to output, and needs to be declared and initialised */
+%option noyywrap
+%option yylineno
 
 %%
 \/\/(.)*                            {
                                     }
-
 "/*"                                { multiline_comment(); }
-
 "#include"[ ]*"<"(_|{letter})({letter}|{number}|_)*".h>" {  
                                         trace("Header File");
                                     }
 [\n]                                {
                                     }
-
 [{]                                 { 
                                         trace("{");
                                         return *yytext;
@@ -40,40 +31,37 @@ single_operators    [+*/%^&.=-]
                                         trace("}");
                                         return *yytext;
                                     }
-
 \"[^"\n]*["\n]                      { 
                                         if(yytext[yyleng-1]!='"'){
-                                            yyerror("Unclosed String\n");
+                                            yyerror("String is unclosed\n");
                                         }
                                         trace("CONSTANT_STRING");
-                                        strcpy(yylval.char_ptr, yytext);
+                                        strcpy(yylval.char_pointer, yytext);
                                         return CONSTANT_STRING;
                                     }
-
 int                                 { 
                                         trace("INT");
-										strcpy(yylval.char_ptr, yytext);
+                                        strcpy(yylval.char_pointer, yytext);
                                         return INT;
-                                    }
-
-float                               { 
-                                        trace("FLOAT");
-										strcpy(yylval.char_ptr, yytext);
-                                        return FLOAT;
                                     }
 char                                { 
                                         trace("CHAR");
-										strcpy(yylval.char_ptr, yytext);
+                                        strcpy(yylval.char_pointer, yytext);
                                         return CHAR;
+                                    }
+float                               { 
+                                        trace("FLOAT");
+                                        strcpy(yylval.char_pointer, yytext);
+                                        return FLOAT;
                                     }
 double                              { 
                                         trace("DOUBLE");
-										strcpy(yylval.char_ptr, yytext);
+                                        strcpy(yylval.char_pointer, yytext);
                                         return DOUBLE;
                                     }
 void                                { 
                                         trace("VOID");
-										strcpy(yylval.char_ptr, yytext);
+                                        strcpy(yylval.char_pointer, yytext);
                                         return VOID;
                                     }
 signed                              { 
@@ -170,31 +158,31 @@ return                              {
 
 \'.\'                               { 
                                         trace("CONSTANT_CHAR"); 
-                                        strcpy(yylval.char_ptr, yytext);
+                                        strcpy(yylval.char_pointer, yytext);
                                         return CONSTANT_CHAR;
                                     }
 
 {number}+(\.{number}+)?e{number}+   { 
                                         trace("CONSTANT_FLOAT"); 
-                                        strcpy(yylval.char_ptr, yytext);
+                                        strcpy(yylval.char_pointer, yytext);
                                         return CONSTANT_FLOAT;
                                     } 
 
 {number}+\.{number}+                { 
                                         trace("CONSTANT_FLOAT"); 
-                                        strcpy(yylval.char_ptr, yytext);
+                                        strcpy(yylval.char_pointer, yytext);
                                         return CONSTANT_FLOAT;
                                     }                                             
 
 {number}+                           { 
                                         trace("CONSTANT_INTEGER"); 
-                                        strcpy(yylval.char_ptr, yytext);
+                                        strcpy(yylval.char_pointer, yytext);
                                         return CONSTANT_INTEGER;
                                     }    
 
 (_|{letter})({letter}|{number}|_)*  { 
                                         trace("IDENTIFIER");
-                                        strcpy(yylval.char_ptr, yytext);
+                                        strcpy(yylval.char_pointer, yytext);
                                         return IDENTIFIER;
                                     }
 
@@ -243,29 +231,45 @@ return                              {
                                         trace("/="); 
                                         return DIV_ASSIGN;
                                     }
-"%="					            { 
+"%="                                { 
                                         trace("%="); 
                                         return MOD_ASSIGN;
                                     }
 
-">>="					            { 
+">>="                               { 
                                         trace(">>="); 
                                         return RIGHT_ASSIGN;
                                     }
-"<<="					            { 
+"<<="                               { 
                                         trace("<<="); 
                                         return LEFT_ASSIGN;
                                     }
 
-"&="					            { 
+"&="                                { 
                                         trace("&="); 
                                         return AND_ASSIGN;
                                     }
-"^="					            { 
+"||"                                { 
+                                        trace("||"); 
+                                        return LOGIC_OR;
+                                    }
+"!"                                 { 
+                                        trace("!"); 
+                                        return NOT;
+                                    }
+"++"                                { 
+                                        trace("+="); 
+                                        return INCREMENT_OPERATOR;
+                                    }  
+"--"                                { 
+                                        trace("--"); 
+                                        return DECREMENT_OPERATOR;
+                                    }
+"^="                                { 
                                         trace("^="); 
                                         return XOR_ASSIGN;
                                     }
-"|="					            { 
+"|="                                { 
                                         trace("|="); 
                                         return OR_ASSIGN;
                                     }
@@ -277,45 +281,27 @@ return                              {
 "&&"                                { 
                                         trace("&&"); 
                                         return LOGIC_AND;
-                                    }
-"||"                                { 
-                                        trace("||"); 
-                                        return LOGIC_OR;
-                                    }
-"!"                                 { 
-                                        trace("!"); 
-                                        return NOT;
-                                    }
-  
-"++"                                { 
-                                        trace("+="); 
-                                        return INCREMENT_OPERATOR;
-                                    }  
-"--"                                { 
-                                        trace("--"); 
-                                        return DECREMENT_OPERATOR;
                                     }  
                                                                       
 
-(({number}({letter}|{number}|_)+)|.)      { yyerror("Invalid Token"); }
+(({number}({letter}|{number}|_)+)|.) { yyerror("Token  is  wrong"); }
 
 %%
 
 void multiline_comment()
 {
-    int c;
-    while ((c = input()) != 0){
-        if (c == '*'){
-            while ((c = input()) == '*')
-                ;
+    int abc;
+    while ((abc = input()) != 0){
 
-            if (c == '/')
-                return;
+        if (abc == '*'){
+          
+      while ((abc = input()) == '*');
+           
+       if (abc=='/')
+               return;
 
-            if (c == 0)
+            if (abc== 0)
                 break;
         }
-    }
-
-    yyerror("Unterminated Multiline Comment");
+    }     yyerror("Unterminated   Multiline   Comment");
 }
