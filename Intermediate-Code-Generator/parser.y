@@ -58,12 +58,15 @@ int loopStartLabel = -1, loopEndLabel = -1;
 
 // To allow for mutiple datatypes
 %union {
-	char char_ptr[100];
+        char char_ptr[100];
     int intval;
 }
 
+
+// here non terminals are defined 
+
 %token <char_ptr> IDENTIFIER
-%token <char_ptr> INT
+%token <char_ptr> INT // tokens
 %token <char_ptr> CHAR
 %token <char_ptr> FLOAT
 %token <char_ptr> DOUBLE
@@ -80,104 +83,121 @@ int loopStartLabel = -1, loopEndLabel = -1;
 %nonassoc IfWithoutElse
 %nonassoc ELSE
 
-%start Begin
+
+// this is begining of prduction rules
+%start Begin // this is the start symbol
 
 %%
+
+// this section has all the production rules regarding all the non terminals, we can also add extra non terminal and define them later 
+// but we need to define all the non terminals
 Begin
     : Include
     | Include Begin
     | Declaration
     | Declaration Begin
-	| Function_Definition
+        | Function_Definition
     | Function_Definition Begin
     | Function_Declaration
     | Function_Declaration Begin
-	;
+        ;
 
+// used above in Begin
 Declaration
     :  Type Identifier_List ';'
     ;
 
+// used above in Deckaration and defined here
 Identifier_List
     : Array_Notation
     | IDENTIFIER ',' Identifier_List        {   redeclaration_error_check($1);
-                                                symbol_table_insert(symbol_table,$1 , curr_scope->scope_num, datatype, "", yylineno);
+                                                symbl_tbl_insrt(symbol_table,$1 , curr_scope->scope_num, datatype, "", yylineno);
                                             }
     | '*' IDENTIFIER ',' Identifier_List    {
                                                 redeclaration_error_check($2);
                                                 int len = strlen(datatype);
                                                 datatype[len] = '*';
                                                 datatype[len +1] = '\0';
-                                                symbol_table_insert(symbol_table,$2 , curr_scope->scope_num, datatype, "", yylineno);
+                                                symbl_tbl_insrt(symbol_table,$2 , curr_scope->scope_num, datatype, "", yylineno);
                                                 datatype[len] = '\0';
                                             }
     | Array_Notation ',' Identifier_List
     | IDENTIFIER                            {
                                                 redeclaration_error_check($1);
-                                                symbol_table_insert(symbol_table,$1 , curr_scope->scope_num, datatype, "", yylineno);}
+                                                symbl_tbl_insrt(symbol_table,$1 , curr_scope->scope_num, datatype, "", yylineno);}
     | '*' IDENTIFIER                        {
                                                 redeclaration_error_check($2);
                                                 int len = strlen(datatype);
                                                 datatype[len] = '*';
                                                 datatype[len +1] = '\0';
-                                                symbol_table_insert(symbol_table,$2 , curr_scope->scope_num, datatype, "", yylineno);
+                                                symbl_tbl_insrt(symbol_table,$2 , curr_scope->scope_num, datatype, "", yylineno);
                                                 datatype[len] = '\0';
                                             }
     | Define_Assign ',' Identifier_List
     | Define_Assign
     ;
 
+// used in stating in begin and is defined here
 Function_Declaration
         : Type IDENTIFIER Bracket_open Formal_Param_List ')' ';'    {
                                                                         redeclaration_error_check($2);
                                                                         char funcType[100] = "Function: ";
                                                                         strcat(funcType, datatype);
-                                                                        symbol_node_t *node = symbol_table_insert(symbol_table,$2, curr_scope->scope_num, funcType, "", yylineno);
+                                                                        symbol_node_t *node = symbl_tbl_insrt(symbol_table,$2, curr_scope->scope_num, funcType, "", yylineno);
                                                                         node->is_function_defined = false;
                                                                         node->num_params = num_params;
                                                                     }
     ;
 
+// used above in begin and defined here 
+
 Function_Definition
-	: Type IDENTIFIER
+        : Type IDENTIFIER
         Bracket_open Formal_Param_List ')'
                             {   curr_buff = get_new_node(TAC_code);
                                 sprintf(temp_buf, "Func %s begin:\n", $2);
                                 strcat(curr_buff->code, temp_buf);
                             }
         Compound_Statement     {
+
                                     symbol_node_t *node = redefined_error_check($2);
                                     char funcType[100] = "Function: ";
                                     strcat(funcType, datatype);
+
                                     if(!node) {
-                                        symbol_node_t *node = symbol_table_insert(symbol_table,$2, curr_scope->scope_num, funcType, "", yylineno);
+                                        symbol_node_t *node = symbl_tbl_insrt(symbol_table,$2, curr_scope->scope_num, funcType, "", yylineno);
                                         node->num_params = num_params;
+                                        curr_buff = get_new_node(TAC_code);
+                                        sprintf(temp_buf, "Func end\n");
+                                        strcat(curr_buff->code, temp_buf);
                                     }
+
+
                                     else {
                                         node->is_function_defined = true;
                                         node->num_params = num_params;
+                                        curr_buff = get_new_node(TAC_code);
+                                        sprintf(temp_buf, "Func end\n");
+                                        strcat(curr_buff->code, temp_buf);
                                     }
 
-                                    curr_buff = get_new_node(TAC_code);
-                                    sprintf(temp_buf, "Func end\n");
-                                    strcat(curr_buff->code, temp_buf);
                                 }
-	;
+        ;
 
 Bracket_open
     : '('                                                               { num_params = 0; }
     ;
 
 Formal_Param_List
-	: VOID
-    | Type IDENTIFIER                                  { num_params++; void_param_check($1); symbol_table_insert(symbol_table,$2 , curr_scope->scope_num, $1, "", yylineno);trace("Formal_Param_List Rule 1\n");}
-	| Type '*' IDENTIFIER                              { num_params++; void_param_check($1); symbol_table_insert(symbol_table,$3 , curr_scope->scope_num, $1, "", yylineno);trace("Formal_Param_List Rule 2\n");}
-	| Type Array_Notation                              { num_params++; void_param_check($1); trace("Formal_Param_List Rule 3\n");}
-	| Type IDENTIFIER ',' Formal_Param_List            { num_params++; void_param_check($1); symbol_table_insert(symbol_table,$2 , curr_scope->scope_num, $1, "", yylineno);trace("Formal_Param_List Rule 4\n");}
-	| Type '*' IDENTIFIER ',' Formal_Param_List        { num_params++; void_param_check($1); symbol_table_insert(symbol_table,$3 , curr_scope->scope_num, $1, "", yylineno);trace("Formal_Param_List Rule 5\n");}
-	| Type Array_Notation ',' Formal_Param_List        { num_params++; void_param_check($1); trace("Formal_Param_List Rule 6\n");}
-	|
-	;
+        : VOID
+    | Type IDENTIFIER                                  { num_params++; void_param_check($1); symbl_tbl_insrt(symbol_table,$2 , curr_scope->scope_num, $1, "", yylineno);trace("Formal_Param_List Rule 1\n");}
+        | Type '*' IDENTIFIER                              { num_params++; void_param_check($1); symbl_tbl_insrt(symbol_table,$3 , curr_scope->scope_num, $1, "", yylineno);trace("Formal_Param_List Rule 2\n");}
+        | Type Array_Notation                              { num_params++; void_param_check($1); trace("Formal_Param_List Rule 3\n");}
+        | Type IDENTIFIER ',' Formal_Param_List            { num_params++; void_param_check($1); symbl_tbl_insrt(symbol_table,$2 , curr_scope->scope_num, $1, "", yylineno);trace("Formal_Param_List Rule 4\n");}
+        | Type '*' IDENTIFIER ',' Formal_Param_List        { num_params++; void_param_check($1); symbl_tbl_insrt(symbol_table,$3 , curr_scope->scope_num, $1, "", yylineno);trace("Formal_Param_List Rule 5\n");}
+        | Type Array_Notation ',' Formal_Param_List        { num_params++; void_param_check($1); trace("Formal_Param_List Rule 6\n");}
+        |
+        ;
 
 Type
     : INT                       { strcpy($$, $1); strcpy(datatype, $1);}
@@ -191,6 +211,8 @@ Type
     | Modifiers CHAR            { strcpy(datatype, $2);}
     ;
 
+
+
 Modifiers
     : SHORT | LONG | UNSIGNED | SIGNED
     ;
@@ -199,7 +221,7 @@ Array_Notation
     : IDENTIFIER '[' CONSTANT_INTEGER ']'   {
                                                 char arrayType[100] = "Array: ";strcat(arrayType, datatype);
                                                 arr_dimension_check($1, $3);
-                                                symbol_table_insert(symbol_table,$1, curr_scope->scope_num, arrayType, $3, yylineno);
+                                                symbl_tbl_insrt(symbol_table,$1, curr_scope->scope_num, arrayType, $3, yylineno);
                                                 arr_subscript_check($1);
                                             }
     | '*' IDENTIFIER '[' CONSTANT_INTEGER ']'   {
@@ -209,7 +231,7 @@ Array_Notation
                                                     datatype[len] = '*';
                                                     datatype[len +1] = '\0';
                                                     char arrayType[100] = "Array: ";strcat(arrayType, datatype);
-                                                    symbol_table_insert(symbol_table,$2, curr_scope->scope_num, arrayType, $4, yylineno);
+                                                    symbl_tbl_insrt(symbol_table,$2, curr_scope->scope_num, arrayType, $4, yylineno);
                                                     datatype[len] = '\0';
                                                     arr_subscript_check($2);
                                                 }
@@ -217,7 +239,7 @@ Array_Notation
                                                     redeclaration_error_check($2);
                                                     arr_dimension_check($2, $4);
                                                     char arrayType[100] = "Array: ";strcat(arrayType, datatype);
-                                                    symbol_table_insert(symbol_table,$2, curr_scope->scope_num, arrayType, $4, yylineno);
+                                                    symbl_tbl_insrt(symbol_table,$2, curr_scope->scope_num, arrayType, $4, yylineno);
                                                     arr_subscript_check($2);
                                                 }
     | IDENTIFIER '[' '-' CONSTANT_INTEGER ']' {
@@ -236,7 +258,7 @@ Array_Notation
 Define_Assign
     : IDENTIFIER Assignment_Operator Expression             {
                                                                 //redeclaration_error_check($1);
-                                                                symbol_table_insert(symbol_table,$1 , curr_scope->scope_num, datatype, "", yylineno);
+                                                                symbl_tbl_insrt(symbol_table,$1 , curr_scope->scope_num, datatype, "", yylineno);
                                                                 trace("Define_Assign Rule 1\n");
 
                                                                 stack_node op = popStack(three_address_code_stack);
@@ -253,7 +275,7 @@ Define_Assign
                                                             }
     | '*' IDENTIFIER Assignment_Operator Expression         {
                                                                 //redeclaration_error_check($2);
-                                                                symbol_table_insert(symbol_table,$2 , curr_scope->scope_num, datatype, "", yylineno);
+                                                                symbl_tbl_insrt(symbol_table,$2 , curr_scope->scope_num, datatype, "", yylineno);
                                                             }
     | Array_Notation Assignment_Operator Expression
     ;
@@ -287,18 +309,18 @@ Assignment
     ;
 
 Assignment_Operator
-	: '='
+        : '='
     | ADD_ASSIGN
     | SUB_ASSIGN
-	| MUL_ASSIGN
-	| DIV_ASSIGN
-	| MOD_ASSIGN
-	| LEFT_ASSIGN
-	| RIGHT_ASSIGN
-	| AND_ASSIGN
-	| XOR_ASSIGN
-	| OR_ASSIGN
-	;
+        | MUL_ASSIGN
+        | DIV_ASSIGN
+        | MOD_ASSIGN
+        | LEFT_ASSIGN
+        | RIGHT_ASSIGN
+        | AND_ASSIGN
+        | XOR_ASSIGN
+        | OR_ASSIGN
+        ;
 
 Expression
     : Logical_Expression
@@ -317,6 +339,8 @@ Logical_Expression
     | NOT Relational_Expression                             {
                                                                 stack_node op = popStack(three_address_code_stack);
                                                                 curr_buff = get_new_node(TAC_code);
+
+
                                                                 pushStack(three_address_code_stack, TEMP_VAR);
                                                                 print_st(three_address_code_stack, curr_buff);
 
@@ -389,10 +413,10 @@ Multiplicative_Expression
 Primary
     : '(' Expression ')'
     | '(' Assignment ')'
-    | CONSTANT_INTEGER     {pushStack(three_address_code_stack, $1);symbol_table_insert(constant_table, $1, -1, "int", "", yylineno); trace("CONSTANT_INTEGER\n");}
-    | CONSTANT_FLOAT       {pushStack(three_address_code_stack, $1);symbol_table_insert(constant_table, $1, -1, "float", "", yylineno); trace("CONSTANT_FLOAT\n");}
-    | CONSTANT_CHAR        {pushStack(three_address_code_stack, $1);symbol_table_insert(constant_table, $1, -1, "char", "", yylineno); trace("CONSTANT_CHAR\n");}
-    | CONSTANT_STRING      {pushStack(three_address_code_stack, $1);symbol_table_insert(constant_table, $1, -1, "string", "", yylineno); trace("CONSTANT_STRING\n");}
+    | CONSTANT_INTEGER     {pushStack(three_address_code_stack, $1);symbl_tbl_insrt(constant_table, $1, -1, "int", "", yylineno); trace("CONSTANT_INTEGER\n");}
+    | CONSTANT_FLOAT       {pushStack(three_address_code_stack, $1);symbl_tbl_insrt(constant_table, $1, -1, "float", "", yylineno); trace("CONSTANT_FLOAT\n");}
+    | CONSTANT_CHAR        {pushStack(three_address_code_stack, $1);symbl_tbl_insrt(constant_table, $1, -1, "char", "", yylineno); trace("CONSTANT_CHAR\n");}
+    | CONSTANT_STRING      {pushStack(three_address_code_stack, $1);symbl_tbl_insrt(constant_table, $1, -1, "string", "", yylineno); trace("CONSTANT_STRING\n");}
     | IDENTIFIER           {pushStack(three_address_code_stack, $1); scope_error_check($1);trace("Primary Identifier\n");}
     | '*' IDENTIFIER       {pushStack(three_address_code_stack, $2); scope_error_check($2);trace("Pointer Identifier\n");}
     | '&' IDENTIFIER       {pushStack(three_address_code_stack, $2); scope_error_check($2);trace("Address of Identifier\n");}
@@ -408,7 +432,7 @@ Primary
 
 Compound_Statement
     : Scope_Start Statement_List Scope_End
-	;
+        ;
 
 Scope_Start
     : '{'   {   curr_scope = add_child_scope(curr_scope);   }
@@ -444,7 +468,7 @@ Statement
                     sprintf(temp_buf, "GOTO L%d:\n", loopStartLabel);
                     strcat(curr_buff->code, temp_buf);
                 }
-	| ';'
+        | ';'
     ;
 
 Return_Statement
@@ -664,17 +688,17 @@ ElseNotGoto
     ;
 
 Function_Call
-    : IDENTIFIER Bracket_open Param_List ')'     { scope_error_check($1); num_param_check($1); check_is_function($1); /*symbol_table_insert(symbol_table, $1, curr_scope->scope_num, "Function", "", yylineno);trace("Function Call\n"); */}
+    : IDENTIFIER Bracket_open Param_List ')'     { scope_error_check($1); num_param_check($1); check_is_function($1); /*symbl_tbl_insrt(symbol_table, $1, curr_scope->scope_num, "Function", "", yylineno);trace("Function Call\n"); */}
     ;
 
 Include_Statement
-	: '#' INCLUDE LESSER_THAN IDENTIFIER GREATER_THAN   {scope_error_check($4);}
-	| '#' INCLUDE LESSER_THAN IDENTIFIER '.' IDENTIFIER GREATER_THAN    {scope_error_check($4);scope_error_check($6);}
-	;
+        : '#' INCLUDE LESSER_THAN IDENTIFIER GREATER_THAN   {scope_error_check($4);}
+        | '#' INCLUDE LESSER_THAN IDENTIFIER '.' IDENTIFIER GREATER_THAN    {scope_error_check($4);scope_error_check($6);}
+        ;
 
 Include
-	: Include_Statement
-	;
+        : Include_Statement
+        ;
 
 
 %%
@@ -696,21 +720,24 @@ inline void print_TAC_operator(char *op) {
         printf(" = %s %s %s\n", op1.var_name, op, op2.var_name);
 }
 
+// used the function defined in scope.c for checing the scope error
 inline void scope_error_check(char *symbol){
     if(!scope_check(symbol_table, symbol, curr_scope)){
         yyerror(strcat(symbol, " not found in current or ancestor scopes"));
     }
 }
 
+
+// we had count of parameter which we are again verfitying 
+// it should have equal count as it has in declaration.
 inline void num_param_check(char *symbol) {
 
     symbol_node_t *node = scope_check(symbol_table, symbol, curr_scope);
+    char msg[100] = "Too few arguments passed to ";
     if(node != NULL && num_params > node->num_params) {
-        char msg[100] = "Too many arguments passed to ";
         yyerror(strcat(msg, symbol));
     }
     else if(node != NULL && num_params < node->num_params) {
-        char msg[100] = "Too few arguments passed to ";
         yyerror(strcat(msg, symbol));
     }
 }
@@ -723,24 +750,32 @@ inline void redeclaration_error_check(char *symbol){
 
 symbol_node_t * redefined_error_check(char *symbol){
     symbol_node_t *node = scope_check(symbol_table, symbol, curr_scope);
+
+
     if(node != NULL && node->is_function_defined)
-        yyerror(strcat(symbol, " is a redefinition"));
+        yyerror(strcat(symbol, " : a redefinition"));
 
     return node;
 }
 
 inline void arr_dimension_check(char *symbol, char *arr_size){
-    if(atoi(arr_size) < 1){
+
+    if(atoi(arr_size) < 1){ //  function of ascii to integer 
         yyerror(strcat(symbol, " has non-positive array size"));
     }
 }
 
 inline void arr_subscript_check(char *symbol){
-    symbol_node_t *node = symbol_table_lookup(symbol_table, symbol);
-    if(!strstr(node->type, "Array")){
+
+
+    symbol_node_t *node = symbl_tbl_lkp(symbol_table, symbol);
+
+    if(!strstr(node->type, "Array")){ // this function returns the first occurence of substring in other
         yyerror(strcat(symbol, " is not an array"));
     }
 }
+
+
 
 inline void void_param_check(char *type) {
     if(!strcmp(type, "void")) {
@@ -750,7 +785,7 @@ inline void void_param_check(char *type) {
 
 inline void check_is_function(char *func_name) {
 
-    symbol_node_t *node = symbol_table_lookup(symbol_table, func_name);
+    symbol_node_t *node = symbl_tbl_lkp(symbol_table, func_name);
     if(node == NULL) {
         yyerror(strcat(func_name, " function not declared"));
     }
@@ -768,8 +803,8 @@ inline void trace(char *s){
 int main()
 {
     curr_scope = init_scope();
-    symbol_table_initialize(symbol_table);
-    symbol_table_initialize(constant_table);
+    symbl_tbl_initlze(symbol_table);
+    symbl_tbl_initlze(constant_table);
     three_address_code_stack = initialize_stack();
 
     TAC_code = init_code_stack();
@@ -779,12 +814,13 @@ int main()
 
     print_TAC_code(TAC_code);
 
-    // symbol_table_print(symbol_table, "Symbol Table");
-    // symbol_table_print(constant_table, "Constant Table");
+    // symbl_tbl_prnt(symbol_table, "Symbol Table");
+    // symbl_tbl_prnt(constant_table, "Constant Table"); 
     printf(FORE_GRN "\n\n Parsing complete  ✔ \n\n" RESET);
 
-    symbol_table_free(symbol_table);
-    symbol_table_free(constant_table);
+    symbl_tbl_fr(symbol_table);
+    symbl_tbl_fr(constant_table);
+
     // TODO: Free Scope
     f_s(three_address_code_stack);
     return 0;
@@ -792,7 +828,11 @@ int main()
 
 
 void yyerror(const char *s) {
-	printf(FORE_RED "%d : %s %s\n" RESET, yylineno, s, yytext );
+
+
+        printf(FORE_RED "%d : %s %s\n" RESET, yylineno, s, yytext ); // FOR_RED are for color, defined in ascii color code 
+
+        // these re defined in misc.h so that we can use them here easily and convinently
     printf(FORE_RED "\nParsing failed ✘ \n\n" RESET);
     exit(-2);
 }
