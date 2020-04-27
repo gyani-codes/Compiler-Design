@@ -1,3 +1,8 @@
+<<<<<<< HEAD
+=======
+
+
+>>>>>>> 9176f0a7a7b3fcf35904b80ae6f86ba722a2285a
 %{
 #include "y.tab.h"
 
@@ -18,20 +23,35 @@ single_operators    [+*/%^&.=-]
 \/\/(.)*                            {
                                     }
 "/*"                                { multiline_comment(); }
+<<<<<<< HEAD
 "#include"[ ]*"<"(_|{letter})({letter}|{number}|_)*".h>" {  
+=======
+
+"#include"[ ]*"<"(_|{letter})({letter}|{number}|_)*".h>" {
+>>>>>>> 9176f0a7a7b3fcf35904b80ae6f86ba722a2285a
                                         trace("Header File");
                                     }
 [\n]                                {
                                     }
+<<<<<<< HEAD
 [{]                                 { 
+=======
+
+[{]                                 {
+>>>>>>> 9176f0a7a7b3fcf35904b80ae6f86ba722a2285a
                                         trace("{");
                                         return *yytext;
                                     }
-[}]                                 { 
+[}]                                 {
                                         trace("}");
                                         return *yytext;
                                     }
+<<<<<<< HEAD
 \"[^"\n]*["\n]                      { 
+=======
+
+\"[^"\n]*["\n]                      {
+>>>>>>> 9176f0a7a7b3fcf35904b80ae6f86ba722a2285a
                                         if(yytext[yyleng-1]!='"'){
                                             yyerror("String is unclosed\n");
                                         }
@@ -39,216 +59,236 @@ single_operators    [+*/%^&.=-]
                                         strcpy(yylval.char_ptr, yytext);
                                         return CONSTANT_STRING;
                                     }
+<<<<<<< HEAD
 int                                 { 
+=======
+
+int                                 {
+>>>>>>> 9176f0a7a7b3fcf35904b80ae6f86ba722a2285a
                                         trace("INT");
 										strcpy(yylval.char_ptr, yytext);
                                         return INT;
                                     }
+<<<<<<< HEAD
 char                                { 
+=======
+
+float                               {
+                                        trace("FLOAT");
+										strcpy(yylval.char_ptr, yytext);
+                                        return FLOAT;
+                                    }
+char                                {
+>>>>>>> 9176f0a7a7b3fcf35904b80ae6f86ba722a2285a
                                         trace("CHAR");
 										strcpy(yylval.char_ptr, yytext);
                                         return CHAR;
                                     }
+<<<<<<< HEAD
 float                               { 
                                         trace("FLOAT");
 										strcpy(yylval.char_ptr, yytext);
                                         return FLOAT;
                                     }
 double                              { 
+=======
+double                              {
+>>>>>>> 9176f0a7a7b3fcf35904b80ae6f86ba722a2285a
                                         trace("DOUBLE");
 										strcpy(yylval.char_ptr, yytext);
                                         return DOUBLE;
                                     }
-void                                { 
+void                                {
                                         trace("VOID");
 										strcpy(yylval.char_ptr, yytext);
                                         return VOID;
                                     }
-signed                              { 
+signed                              {
                                         trace("SIGNED");
                                         return SIGNED;
                                     }
-unsigned                            { 
+unsigned                            {
                                         trace("UNSIGNED");
                                         return UNSIGNED;
                                     }
-long                                { 
+long                                {
                                         trace("LONG");
                                         return LONG;
                                     }
-short                               { 
+short                               {
                                         trace("SHORT");
                                         return SHORT;
-                                      
+
                                     }
-switch                              { 
+switch                              {
                                         trace("SWITCH");
                                         return SWITCH;
                                     }
-break                               { 
+break                               {
                                         trace("BREAK");
                                         return BREAK;
                                     }
-continue                            { 
+continue                            {
                                         trace("CONTINUE");
                                         return CONTINUE;
                                     }
-case                                { 
+case                                {
                                         trace("CASE");
                                         return CASE;
                                     }
-default                             { 
+default                             {
                                         trace("DEFAULT");
                                         return DEFAULT;
                                     }
-for                                 { 
+for                                 {
                                         trace("FOR");
                                         return FOR;
                                     }
-while                               { 
+while                               {
                                         trace("WHILE");
                                         return WHILE;
                                     }
-do                                  { 
+do                                  {
                                         trace("DO");
                                         return DO;
                                     }
-if                                  { 
+if                                  {
                                         trace("IF");
                                         return IF;
-                                      
+
                                     }
-else                                { 
+else                                {
                                         trace("ELSE");
                                         return ELSE;
                                     }
 
-return                              { 
+return                              {
                                         trace("RETURN");
                                         return RETURN;
                                     }
-                                                                                                            
-[(]                                 { 
+
+[(]                                 {
                                         trace("(");
                                         return *yytext;
                                     }
-[)]                                 { 
+[)]                                 {
                                         trace(")");
                                         return *yytext;
                                     }
-[\[]                                { 
+[\[]                                {
                                         trace("[");
                                         return *yytext;
                                     }
-[\]]                                { 
+[\]]                                {
                                         trace("]");
                                         return *yytext;
                                     }
-[,]                                 { 
+[,]                                 {
                                         trace(",");
                                         return *yytext;
-                                    } 
+                                    }
 
 [\t ]                               {}
 
-[;]                                 { 
+[;]                                 {
                                         trace(";");
                                         return *yytext;
                                     }
 
-\'.\'                               { 
-                                        trace("CONSTANT_CHAR"); 
+\'.\'                               {
+                                        trace("CONSTANT_CHAR");
                                         strcpy(yylval.char_ptr, yytext);
                                         return CONSTANT_CHAR;
                                     }
 
-{number}+(\.{number}+)?e{number}+   { 
-                                        trace("CONSTANT_FLOAT"); 
+{number}+(\.{number}+)?e{number}+   {
+                                        trace("CONSTANT_FLOAT");
                                         strcpy(yylval.char_ptr, yytext);
                                         return CONSTANT_FLOAT;
-                                    } 
+                                    }
 
-{number}+\.{number}+                { 
-                                        trace("CONSTANT_FLOAT"); 
+{number}+\.{number}+                {
+                                        trace("CONSTANT_FLOAT");
                                         strcpy(yylval.char_ptr, yytext);
                                         return CONSTANT_FLOAT;
-                                    }                                             
+                                    }
 
-{number}+                           { 
-                                        trace("CONSTANT_INTEGER"); 
+{number}+                           {
+                                        trace("CONSTANT_INTEGER");
                                         strcpy(yylval.char_ptr, yytext);
                                         return CONSTANT_INTEGER;
-                                    }    
+                                    }
 
-(_|{letter})({letter}|{number}|_)*  { 
+(_|{letter})({letter}|{number}|_)*  {
                                         trace("IDENTIFIER");
                                         strcpy(yylval.char_ptr, yytext);
                                         return IDENTIFIER;
                                     }
 
-{single_operators}                  { 
-                                        trace("SINGLE OPERATOR"); 
+{single_operators}                  {
+                                        trace("SINGLE OPERATOR");
                                         return *yytext;
                                     }
 
-"=="                                { 
-                                        trace("=="); 
+"=="                                {
+                                        trace("==");
                                         return DOUBLE_EQUAL;
                                     }
-"!="                                { 
-                                        trace("!="); 
+"!="                                {
+                                        trace("!=");
                                         return NOT_EQUAL;
                                     }
-"<"                                 { 
-                                        trace("<"); 
+"<"                                 {
+                                        trace("<");
                                         return LESSER_THAN;
                                     }
-">"                                 { 
-                                        trace(">"); 
+">"                                 {
+                                        trace(">");
                                         return GREATER_THAN;
                                     }
-"<="                                 { 
-                                        trace("<="); 
+"<="                                 {
+                                        trace("<=");
                                         return LESSER_EQUAL;
                                     }
 
-"+="                                { 
-                                        trace("+="); 
+"+="                                {
+                                        trace("+=");
                                         return ADD_ASSIGN;
                                     }
 
-"-="                                { 
-                                        trace("-="); 
+"-="                                {
+                                        trace("-=");
                                         return SUB_ASSIGN;
                                     }
 
-"*="                                { 
-                                        trace("*="); 
+"*="                                {
+                                        trace("*=");
                                         return MUL_ASSIGN;
                                     }
-                                    
-"/="                                { 
-                                        trace("/="); 
+
+"/="                                {
+                                        trace("/=");
                                         return DIV_ASSIGN;
                                     }
-"%="					            { 
-                                        trace("%="); 
+"%="					            {
+                                        trace("%=");
                                         return MOD_ASSIGN;
                                     }
 
-">>="					            { 
-                                        trace(">>="); 
+">>="					            {
+                                        trace(">>=");
                                         return RIGHT_ASSIGN;
                                     }
-"<<="					            { 
-                                        trace("<<="); 
+"<<="					            {
+                                        trace("<<=");
                                         return LEFT_ASSIGN;
                                     }
 
-"&="					            { 
-                                        trace("&="); 
+"&="					            {
+                                        trace("&=");
                                         return AND_ASSIGN;
                                     }
+<<<<<<< HEAD
 "||"                                { 
                                         trace("||"); 
                                         return LOGIC_OR;
@@ -267,22 +307,48 @@ return                              {
                                     }
 "^="					            { 
                                         trace("^="); 
+=======
+"^="					            {
+                                        trace("^=");
+>>>>>>> 9176f0a7a7b3fcf35904b80ae6f86ba722a2285a
                                         return XOR_ASSIGN;
                                     }
-"|="					            { 
-                                        trace("|="); 
+"|="					            {
+                                        trace("|=");
                                         return OR_ASSIGN;
                                     }
 
-">="                                { 
-                                        trace(">="); 
+">="                                {
+                                        trace(">=");
                                         return GREATER_EQUAL;
                                     }
-"&&"                                { 
-                                        trace("&&"); 
+"&&"                                {
+                                        trace("&&");
                                         return LOGIC_AND;
+<<<<<<< HEAD
                                     }  
                                                                       
+=======
+                                    }
+"||"                                {
+                                        trace("||");
+                                        return LOGIC_OR;
+                                    }
+"!"                                 {
+                                        trace("!");
+                                        return NOT;
+                                    }
+
+"++"                                {
+                                        trace("+=");
+                                        return INCREMENT_OPERATOR;
+                                    }
+"--"                                {
+                                        trace("--");
+                                        return DECREMENT_OPERATOR;
+                                    }
+
+>>>>>>> 9176f0a7a7b3fcf35904b80ae6f86ba722a2285a
 
 (({number}({letter}|{number}|_)+)|.) { yyerror("Token  is  wrong"); }
 
