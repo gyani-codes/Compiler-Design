@@ -66,3 +66,6 @@ Parser2/
 # Outputs
 */outputs/*
 *.tokens*
+
+#testcases 
+*/testcases*/
