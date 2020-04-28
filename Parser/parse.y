@@ -1,6 +1,7 @@
 
 
 /*Declarations starts from here 
+Ref: http://www.quut.com/c/ANSI-C-grammar-y.html
   including all header files so that we can use
   the necessary functions
 */
